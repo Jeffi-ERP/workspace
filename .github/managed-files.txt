@@ -1,0 +1,12 @@
+# Written by the export from AloysJehwin/Jeffi_Stores; edits are overwritten. Change them there (oss/).
+.github/CODEOWNERS
+.github/README.md
+.github/managed-files.txt
+.github/workflows/merge.yml
+.github/workflows/pr-checks.yml
+.github/workflows/pr-gate.yml
+LICENSE
+oss/assemble.mjs
+oss/checks.mjs
+oss/promote.mjs
+oss/repos.json

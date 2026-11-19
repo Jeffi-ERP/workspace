@@ -1,0 +1,133 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/*-service/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env*.local
+.env*.bak
+*.env.bak
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+
+# Temporary scripts & guides
+*.sh
+# ...but CI helper scripts MUST be committed — the workflows check them out and
+# run them on the runner, so an ignored script means "No such file" in Actions.
+!.github/scripts/*.sh
+!deploy/k8s/**/*.sh
+/scripts/*
+# CI runs the CLI manifest generator (npm run cli:check).
+!/scripts/gen-admin-manifest.ts
+!/scripts/admin-manifest/
+# The SQL file manifest the release scripts load the schema through, and the one-off split that produced the layout.
+!/scripts/db-files.mjs
+!/scripts/db-split-by-service.mjs
+!/scripts/db-ownership-evidence.mjs
+# Operator tools: set a key in every Secrets Manager secret; rebuild the Google taxonomy snapshot.
+!/scripts/set-secret.sh
+!/scripts/refresh-google-taxonomy.mjs
+# The ready-made site themes' generators (packages/store-core/src/lib/site/themes).
+!/scripts/site-themes/
+# The landing page's product films: record, narrate, render (outputs and .local/ stay ignored inside).
+!/scripts/demo-films/
+!/scripts/demo-films/**/*.sh
+*.csv
+RDS_SECURITY_GROUP_FIX.md
+ADD_IP_TO_SECURITY_GROUP.md
+EMAIL_NOTIFICATION_SYSTEM.md
+QUICKSTART.md
+S3_SETUP_INSTRUCTIONS.md
+SECURITY_GROUP_INSTRUCTIONS.md
+
+# AWS config files
+s3-bucket-policy*.json
+
+# Supabase CLI local state
+supabase/.temp
+
+# Google Service Account key
+jeffi-stores-*.json
+
+# Production env
+.env.production
+
+# Business documents (keep local, don't commit)
+GST Certificate*.pdf
+INV*.pdf
+# pg_dump artifact (regenerate via database/schema/README.md)
+database/schema-live.sql
+
+# Personal notes (career planning, scratch docs)
+ML_JOURNEY.md
+
+# Claude Code runtime files
+.claude/scheduled_tasks.json
+.claude/scheduled_tasks.lock
+.claude/worktrees/
+
+# Claude-generated planning/architecture docs (not checked in)
+docs/MULTI_TENANT_ARCHITECTURE.md
+docs/MULTI_TENANT_PHASES.md
+
+# Graphify dated snapshot directories (regenerated on demand)
+graphify-out/20*/
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# MCP server config — contains credentials, keep local only
+.mcp.json
+
+# On-device model training data (regenerated via scripts/gen-onboarding-dataset.mjs)
+data/onboarding/
+
+# On-device model weights (large; host on CDN/S3 in prod — regenerate via scripts/train+export)
+storefront-service/public/models/onboarding/onnx/*.onnx
+
+# On-device ORT runtime WASM (large; served from public/ or CDN in prod — copy from node_modules/onnxruntime-web/dist)
+storefront-service/public/ort/*.wasm
+storefront-service/public/ort/*.map
+storefront-service/public/models/onboarding/ort/*.wasm
+storefront-service/public/models/onboarding/ort/*.mjs
+
+
+# IDE state (holds local diff caches; never commit)
+.idea/
+.vault-store/
+.env.local.overrides
+
+**/node_modules
+**/.env.local
+document-service/.documents/
+/.vitest-reports
+
+# Publishing helper (deploy/k8s/bootstrap/npm-token.sh stores its token)
+!packages/cli/publish.sh
