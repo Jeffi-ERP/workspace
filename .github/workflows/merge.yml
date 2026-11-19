@@ -129,8 +129,8 @@ jobs:
         with:
           app-id: ${{ vars.OSS_PROMOTE_APP_ID }}
           private-key: ${{ secrets.OSS_PROMOTE_APP_KEY }}
-          owner: AloysJehwin
-          repositories: Jeffi_Stores
+          owner: 'AloysJehwin'
+          repositories: 'Jeffi_Stores'
       - name: This repo at the merged commit
         uses: actions/checkout@v7
         with:
