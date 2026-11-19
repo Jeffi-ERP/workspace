@@ -6,7 +6,7 @@
   "maintainers": "maintainers",
   "owner": "AloysJehwin",
   "homepage": "https://jeffistores.in",
-  "apps": { "export": null, "promote": null },
+  "apps": { "export": 5836021, "promote": 5836027 },
   "managed": [".github/", "LICENSE"],
   "env": {
     "test": {
