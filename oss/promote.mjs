@@ -55,14 +55,36 @@ async function orgIssue(title, body) {
     .catch(e => console.log(`couldn't open an issue: ${e.message}`))
 }
 
+const literal = (cwd, args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 1 << 30, env: { ...process.env, GIT_LITERAL_PATHSPECS: '1' } })
 const managed = [...manifest.managed, ...(repo.managed ?? [])]
 const parent = git(src, ['rev-parse', `${sha}^1`]).trim()
-const patch = git(src, ['diff', '--binary', '--full-index', '--no-renames', parent, sha, '--', '.', ...managed.map(m => `:(exclude)${m.replace(/\/$/, '')}`)])
-const changed = git(src, ['diff', '--name-only', '--no-renames', parent, sha, '--', '.', ...managed.map(m => `:(exclude)${m.replace(/\/$/, '')}`)]).split('\n').filter(Boolean)
-if (!patch.trim()) {
+const notManaged = ['--', '.', ...managed.map(m => `:(exclude)${m.replace(/\/$/, '')}`)]
+const monoPath = f => (repo.path ? `${repo.path}/${f}` : f)
+
+// Files Jeffi_Stores already has in their new state (or already lacks, for a deletion) are left out, so a revert
+// or a change that also landed upstream doesn't read as a conflict.
+const raw = git(src, ['diff', '--raw', '-z', '--no-renames', '--full-index', '--no-abbrev', parent, sha, ...notManaged]).split('\0')
+const entries = []
+for (let i = 0; i + 1 < raw.length; i += 2) {
+  const m = raw[i].match(/^:(\d+) (\d+) ([0-9a-f]+) ([0-9a-f]+) ([A-Z])/)
+  if (m) entries.push({ dstMode: m[2], dst: m[4], status: m[5], path: raw[i + 1] })
+}
+if (!entries.length) {
   summary(`Nothing to promote: ${sha7} only changes managed files.`)
   process.exit(0)
 }
+const have = new Map()
+for (const line of literal(mono, ['ls-tree', '-r', '-z', '--full-tree', 'HEAD', '--', ...entries.map(e => monoPath(e.path))]).split('\0').filter(Boolean)) {
+  const [meta, p] = line.split('\t')
+  const [mode, , oid] = meta.split(' ')
+  have.set(p, { mode, oid })
+}
+const pending = entries.filter(e => {
+  const h = have.get(monoPath(e.path))
+  return e.status === 'D' ? !!h : !h || h.oid !== e.dst || h.mode !== e.dstMode
+})
+const changed = pending.map(e => e.path)
+const patch = pending.length ? literal(src, ['diff', '--binary', '--full-index', '--no-renames', parent, sha, '--', ...changed]) : ''
 
 // The 3-way apply needs each file's pre-image; Jeffi_Stores may not have it yet (an earlier org change not yet promoted).
 for (const m of patch.matchAll(/^index ([0-9a-f]{40})\.\.[0-9a-f]{40}/gm)) {
@@ -81,6 +103,17 @@ const branch = `oss/${repo.name}/${prNumber ? `pr-${prNumber}` : sha7}`
 const source = `${manifest.org}/${repo.name}@${sha}`
 const prUrl = pr?.html_url ?? null
 
+async function alreadyThere() {
+  summary(`Nothing to promote: ${manifest.upstream.repo} ${manifest.promote.base} already has this change (${sha7}).`)
+  if (prNumber && process.env.ORG_TOKEN) {
+    await api(process.env.ORG_TOKEN, 'POST', `/repos/${manifest.org}/${repo.name}/issues/${prNumber}/comments`, {
+      body: `Not promoted: ${manifest.upstream.repo} already has this change.`,
+    }).catch(e => console.log(`couldn't comment on #${prNumber}: ${e.message}`))
+  }
+  process.exit(0)
+}
+if (!pending.length) await alreadyThere()
+
 const patchFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'promote-')), 'change.patch')
 fs.writeFileSync(patchFile, patch)
 git(mono, ['switch', '--quiet', '-C', branch])
@@ -98,6 +131,8 @@ try {
   summary(`Promotion failed: the change doesn't apply to Jeffi_Stores ${manifest.promote.base}.\n\n${conflicted.map(f => `- ${f}`).join('\n')}\n\n\`\`\`\n${detail}\n\`\`\``)
   process.exit(1)
 }
+
+if (tryGit(mono, ['diff', '--cached', '--quiet']) !== null) await alreadyThere()
 
 const [authorName, authorEmail, authorDate] = git(src, ['log', '-1', '--format=%an%x00%ae%x00%aI', sha]).trim().split('\0')
 const message = [
