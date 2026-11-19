@@ -2,6 +2,7 @@
 .github/CODEOWNERS
 .github/README.md
 .github/managed-files.txt
+.github/workflows/issue-triage.yml
 .github/workflows/merge.yml
 .github/workflows/pr-checks.yml
 .github/workflows/pr-gate.yml

@@ -167,8 +167,8 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           SLUG: ${{ steps.app.outputs.app-slug }}
         run: |
-          echo "name=$SLUG[bot]" >> "$GITHUB_OUTPUT"
-          echo "email=$(gh api "users/$SLUG%5Bbot%5D" --jq .id)+$SLUG[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
+          echo "name=${SLUG}[bot]" >> "$GITHUB_OUTPUT"
+          echo "email=$(gh api "users/$SLUG%5Bbot%5D" --jq .id)+${SLUG}[bot]@users.noreply.github.com" >> "$GITHUB_OUTPUT"
       - name: Open the PR on AloysJehwin/Jeffi_Stores
         env:
           MONO_TOKEN: ${{ steps.app.outputs.token }}

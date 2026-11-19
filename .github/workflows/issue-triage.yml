@@ -1,0 +1,25 @@
+# Managed from AloysJehwin/Jeffi_Stores (oss/templates); changes here are overwritten by the next export.
+# New issues are assigned to the owner and labelled needs-triage. Nothing from the issue is executed.
+name: Issue triage
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  triage:
+    name: Assign and label
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh api -X POST "repos/$REPO/issues/$ISSUE/assignees" -f 'assignees[]=AloysJehwin' > /dev/null
+          gh api -X POST "repos/$REPO/issues/$ISSUE/labels" -f 'labels[]=needs-triage' > /dev/null
+          echo "Assigned #$ISSUE to AloysJehwin and labelled it needs-triage."
